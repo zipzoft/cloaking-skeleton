@@ -14,6 +14,6 @@ class GoogleReferrerValidator implements VisitorValidatorInterface
             return false;
         }
         
-        return str_contains(strtolower($referer), 'google.com/search');
+        return str_contains(strtolower($referer), 'google.com');
     }
 }
