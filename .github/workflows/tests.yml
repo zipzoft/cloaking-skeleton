@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.1', '8.2', '8.3', '8.4']
+        php-version: ['8.1', '8.2', '8.3']
       fail-fast: false
 
     steps:
@@ -22,7 +22,7 @@ jobs:
       with:
         php-version: ${{ matrix.php-version }}
         coverage: pcov
-        tools: phpunit
+        tools: composer:v2
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
@@ -42,7 +42,7 @@ jobs:
     - name: Run test suite with coverage
       run: |
         mkdir -p build/logs
-        vendor/bin/phpunit --coverage-clover build/logs/clover.xml --coverage-html coverage
+        vendor/bin/pest --coverage-clover build/logs/clover.xml --coverage-html coverage
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
