@@ -1,5 +1,6 @@
 {
     "name": "zipzoft/cloaking-skeleton",
+    "description": "A PHP cloaking system for validating and managing visitor access",
     "type": "project",
     "license": "MIT",
     "autoload": {
