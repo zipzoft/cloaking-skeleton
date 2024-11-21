@@ -63,6 +63,11 @@ class VisitorValidationApp
     {
         $context = $this->createVisitorContext();
         
+        // Debug logging
+        error_log("Referrer: " . ($context->getReferer() ?? 'null'));
+        error_log("IP: " . $context->getIpAddress());
+        error_log("User Agent: " . $context->getUserAgent());
+        
         if ($this->validateVisitor($context)) {
             $this->sessionManager->markAsValid();
             $this->showMainTemplate();
@@ -73,10 +78,26 @@ class VisitorValidationApp
 
     private function createVisitorContext(): VisitorContext
     {
+        // Get all headers for debugging
+        $headers = getallheaders();
+        error_log("All headers: " . print_r($headers, true));
+        
+        // Check if headers exist
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $referer = $_SERVER['HTTP_REFERER'] ?? '';
+        
+        // Log if headers are missing
+        if (empty($userAgent)) {
+            error_log("Warning: User Agent is empty");
+        }
+        if (empty($referer)) {
+            error_log("Warning: Referer is empty");
+        }
+        
         return new VisitorContext(
             $this->getClientIp(),
-            $_SERVER['HTTP_USER_AGENT'] ?? '',
-            $_SERVER['HTTP_REFERER'] ?? null
+            $userAgent,
+            $referer
         );
     }
 
