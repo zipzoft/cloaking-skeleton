@@ -54,7 +54,6 @@ jobs:
 
     - name: PHPMetrics
       run: |
-        composer require phpmetrics/phpmetrics --dev
         vendor/bin/phpmetrics --report-html=metrics src/
 
     - name: Upload test coverage
