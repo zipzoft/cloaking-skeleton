@@ -178,3 +178,111 @@ test('handles missing HTTP headers gracefully', function () {
                 && $context->getReferer() === '';
         }));
 });
+
+test('handles multiple validators in sequence', function () {
+    $validatorFactory = new ValidatorFactory();
+    $responseHandler = \Mockery::mock(ResponseHandlerInterface::class);
+    $sessionManager = new SessionManager();
+    
+    // Create three validators
+    $validator1 = \Mockery::mock(VisitorValidatorInterface::class);
+    $validator2 = \Mockery::mock(VisitorValidatorInterface::class);
+    $validator3 = \Mockery::mock(VisitorValidatorInterface::class);
+    
+    // First two validators pass, last one fails
+    $validator1->shouldReceive('validate')->once()->andReturn(true);
+    $validator2->shouldReceive('validate')->once()->andReturn(true);
+    $validator3->shouldReceive('validate')->once()->andReturn(false);
+    
+    $validatorFactory->addValidator($validator1);
+    $validatorFactory->addValidator($validator2);
+    $validatorFactory->addValidator($validator3);
+    
+    $responseHandler->shouldReceive('handle')
+        ->once()
+        ->with('./screens/fake.html');
+    
+    $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+    $_SERVER['HTTP_USER_AGENT'] = 'Test Browser';
+    $_SERVER['HTTP_REFERER'] = 'https://google.com';
+    
+    $app = new VisitorValidationApp($validatorFactory, $responseHandler, $sessionManager);
+    $app->run();
+    
+    expect(isset($_SESSION['valid_visitor']))->toBeFalse();
+});
+
+test('handles multiple IP addresses in X-Forwarded-For', function () {
+    $validatorFactory = new ValidatorFactory();
+    $responseHandler = \Mockery::mock(ResponseHandlerInterface::class);
+    $sessionManager = new SessionManager();
+    
+    $validator = \Mockery::mock(VisitorValidatorInterface::class);
+    $validator->shouldReceive('validate')->andReturn(true);
+    $validatorFactory->addValidator($validator);
+    
+    $responseHandler->shouldReceive('handle')->with('./screens/main.html');
+    
+    $_SERVER['HTTP_X_FORWARDED_FOR'] = '192.168.1.1, 10.0.0.1, 172.16.0.1';
+    $_SERVER['HTTP_USER_AGENT'] = 'Test Browser';
+    $_SERVER['HTTP_REFERER'] = 'https://google.com';
+    
+    $app = new VisitorValidationApp($validatorFactory, $responseHandler, $sessionManager);
+    $app->run();
+    
+    $validator->shouldHaveReceived('validate')
+        ->with(\Mockery::on(function ($context) {
+            return $context instanceof VisitorContext && $context->getIpAddress() === '192.168.1.1';
+        }));
+});
+
+test('handles invalid debug page parameter', function () {
+    $validatorFactory = new ValidatorFactory();
+    $responseHandler = \Mockery::mock(ResponseHandlerInterface::class);
+    $sessionManager = new SessionManager();
+    
+    $validator = \Mockery::mock(VisitorValidatorInterface::class);
+    $validator->shouldReceive('validate')->andReturn(true);
+    $validatorFactory->addValidator($validator);
+    
+    $responseHandler->shouldReceive('handle')
+        ->once()
+        ->with('./screens/main.html');
+    
+    $_GET['debug_page'] = 'invalid';
+    $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+    $_SERVER['HTTP_USER_AGENT'] = 'Test Browser';
+    $_SERVER['HTTP_REFERER'] = 'https://google.com';
+    
+    $app = new VisitorValidationApp($validatorFactory, $responseHandler, $sessionManager);
+    $app->run();
+});
+
+test('handles session expiration', function () {
+    $validatorFactory = new ValidatorFactory();
+    $responseHandler = \Mockery::mock(ResponseHandlerInterface::class);
+    $sessionManager = new SessionManager();
+    
+    $validator = \Mockery::mock(VisitorValidatorInterface::class);
+    $validator->shouldReceive('validate')->andReturn(true);
+    $validatorFactory->addValidator($validator);
+    
+    $responseHandler->shouldReceive('handle')
+        ->once()
+        ->with('./screens/main.html');
+    
+    // Set an expired session
+    $_SESSION = ['valid_visitor' => true];
+    session_write_close();
+    session_start();
+    unset($_SESSION['valid_visitor']);
+    
+    $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+    $_SERVER['HTTP_USER_AGENT'] = 'Test Browser';
+    $_SERVER['HTTP_REFERER'] = 'https://google.com';
+    
+    $app = new VisitorValidationApp($validatorFactory, $responseHandler, $sessionManager);
+    $app->run();
+    
+    expect($_SESSION['valid_visitor'])->toBeTrue();
+});

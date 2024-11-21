@@ -16,7 +16,8 @@
         "mockery/mockery": "^1.6",
         "symfony/string": "^6.0",
         "symfony/console": "^6.0",
-        "phpmetrics/phpmetrics": "^2.8"
+        "phpmetrics/phpmetrics": "^2.8",
+        "phpunit/php-code-coverage": "^9.2"
     },
     "config": {
         "allow-plugins": {

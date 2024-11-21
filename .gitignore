@@ -1,1 +1,14 @@
 /vendor
+/coverage
+coverage.xml
+.phpunit.result.cache
+.phpunit.cache
+.php-cs-fixer.cache
+composer.phar
+.env
+.env.backup
+.env.production
+.idea
+.vscode
+*.log
+.DS_Store

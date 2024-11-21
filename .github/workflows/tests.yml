@@ -23,6 +23,7 @@ jobs:
         php-version: ${{ matrix.php-version }}
         coverage: xdebug
         tools: composer:v2
+        ini-values: xdebug.mode=coverage
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
@@ -41,8 +42,8 @@ jobs:
 
     - name: Run test suite with coverage
       run: |
-        mkdir -p build/logs
-        vendor/bin/pest --coverage-clover build/logs/clover.xml --coverage-html coverage
+        mkdir -p build/logs coverage
+        XDEBUG_MODE=coverage vendor/bin/pest --coverage-clover build/logs/clover.xml --coverage-html coverage
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -54,6 +55,7 @@ jobs:
 
     - name: PHPMetrics
       run: |
+        mkdir -p metrics
         vendor/bin/phpmetrics --report-html=metrics src/
 
     - name: Upload test coverage
