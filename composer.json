@@ -19,6 +19,9 @@
         "phpmetrics/phpmetrics": "^2.8",
         "phpunit/php-code-coverage": "^9.2"
     },
+    "scripts": {
+        "test": "vendor/bin/pest"
+    },
     "config": {
         "allow-plugins": {
             "pestphp/pest-plugin": true

@@ -24,8 +24,10 @@ class GoogleReferrerValidator implements VisitorValidatorInterface
             return false;
         }
         
+        // Remove 'www.' if present
+        $host = preg_replace('/^www\./', '', $parsedUrl['host']);
+        
         // Check for various Google domains
-        $host = $parsedUrl['host'];
         $googleDomains = [
             'google.com',
             'google.co.th',
@@ -45,9 +47,9 @@ class GoogleReferrerValidator implements VisitorValidatorInterface
             'google.cn'
         ];
         
-        // Check if the host ends with any Google domain
+        // Check if the host equals or ends with any Google domain
         foreach ($googleDomains as $domain) {
-            if (str_ends_with($host, $domain)) {
+            if ($host === $domain || str_ends_with($host, '.' . $domain)) {
                 error_log("GoogleReferrerValidator: Valid Google domain found: " . $host);
                 return true;
             }
