@@ -8,8 +8,14 @@
             "App\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "require": {
-        "php": "^8.1"
+        "php": "^8.1",
+        "symfony/cache": "^7.1"
     },
     "require-dev": {
         "pestphp/pest": "^1.23",
