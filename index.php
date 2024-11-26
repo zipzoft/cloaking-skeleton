@@ -13,8 +13,8 @@ use App\VisitorValidationApp;
 
 // Create and configure the validator factory
 $validatorFactory = new ValidatorFactory();
-$validatorFactory->addValidator(new ThailandIpValidator());
 $validatorFactory->addValidator(new GoogleReferrerValidator());
+$validatorFactory->addValidator(new ThailandIpValidator());
 
 // Create response handler
 $responseHandler = new HtmlResponseHandler();
